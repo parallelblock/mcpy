@@ -2,6 +2,9 @@ import login
 from primative import r_vi
 import status
 
+class StateException(Exception):
+    pass
+
 class ProtoState():
     def __init__(self, server=False):
         self.server = server
@@ -14,17 +17,24 @@ class ProtoState():
 
         if p is None:
             raise "state: no packet with id {}".format(p_id)
-
-        return p.deserialize(buf)
+        try:
+            return p.deserialize(buf)
+        except:
+            raise StateException(
+                    "failed to deserialize! id: {} data: {} deserializer: {}"
+                    .format(p_id, buf, p))
        
     def encode(self, packet):
         t = type(packet)
         p = self.outbound.get(t)
 
         if p is None:
-            raise "state: no encoder for type {}".format(t)
+            raise StateException("state: no encoder for type {}".format(t))
 
-        return p.serialize(packet)
+        try:
+            return p.serialize(packet)
+        except:
+            raise StateException("failed to serialize! packet: {} serializer: {}".format(packet, p))
 
     def register(self, serializer, server_bound):
         if self.server is not server_bound:

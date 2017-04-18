@@ -1,7 +1,7 @@
 from json import dumps, loads
 import math
 import struct
-import uuid
+from uuid import UUID
 import varint
 
 def rip(buf, t, size):
@@ -106,10 +106,17 @@ def r_angle(buf):
 def w_angle(buf, val):
     w_u_byte(buf, val * 256 / 2 / math.pi)
 
+def r_s_uuid(buf):
+    u_s = r_u8(buf)
+    return UUID(u_s)
+
+def w_s_uuid(buf, val):
+    w_u8(buf, str(val))
+
 def r_uuid(buf):
     ur = buf[:16]
     del buf[:16]
-    return uuid.UUID(bytes=ur)
+    return UUID(bytes=ur)
 
 def w_uuid(buf, val):
     buf.extend(val.bytes)
@@ -136,6 +143,7 @@ m_double = [r_double, w_double]
 vi = [r_vi, w_vi]
 angle = [r_angle, w_angle]
 uuid = [r_uuid, w_uuid]
+s_uuid = [r_s_uuid, w_s_uuid]
 u8 = [r_u8, w_u8]
 json = [r_json, w_json]
 v_bytes = [r_v_bytes, w_v_bytes]

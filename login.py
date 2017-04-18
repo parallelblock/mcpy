@@ -35,7 +35,7 @@ class LoginSuccessPacketSerializer(PacketSerializer):
     def __init__(self):
         self.id = 2
         self.fields = [
-                ["uuid", primative.uuid],
+                ["uuid", primative.s_uuid],
                 ["username", primative.u8]]
         self.type = LoginSuccessPacket
 

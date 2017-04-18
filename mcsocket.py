@@ -6,6 +6,9 @@ from Crypto.Cipher import AES
 
 import varint
 
+class ProtoException(Exception):
+    pass
+
 class MinecraftSocketAdapter:
     def __init__(self, host, port, reader=None, writer=None):
         self.host = host
@@ -23,7 +26,7 @@ class MinecraftSocketAdapter:
 
     def start_encryption(self, key):
         if self.decrypt is not None or self.encrypt is not None:
-            raise "illegal state: already started encryption!"
+            raise ProtoException("illegal state: already started encryption!")
 
         self.decrypt = AES.new(key=key, mode=AES.MODE_CFB, IV=key)
         self.encrypt = AES.new(key=key, mode=AES.MODE_CFB, IV=key)
@@ -35,10 +38,14 @@ class MinecraftSocketAdapter:
         await self.write_lock.acquire()
         try:    
             unc_len = len(data)
-            if self.comp_threshold >= 0 and self.comp_threshold <= unc_len:
+            if self.comp_threshold >= 0:
                 buf = bytearray()
-                varint.write_int(unc_len, buf)
-                buf.extend(zlib.compress(data))
+                if self.comp_threshold <= unc_len:
+                    varint.write_int(unc_len, buf)
+                    buf.extend(zlib.compress(data))
+                else:
+                    varint.write_int(0, buf)
+                    buf.extend(data)
                 data = buf
 
             buf = bytearray()
@@ -80,19 +87,20 @@ class MinecraftSocketAdapter:
                 prefix_length_left -= 1
 
             if packet_len is -1:
-                raise "proto error: packet length varint overran"
+                raise ProtoException("proto error: packet length varint overran")
                 
             dat = await self._read_bytes(n=packet_len-len(buf), exact=True)
             buf.extend(dat)
 
             if self.comp_threshold >= 0:
                 uncomp_len, n = varint.read_int(buf)
-                if uncomp_len < self.comp_threshold:
-                    raise "proto error: sent compressed packet below threshold"
+                if uncomp_len is not 0 and uncomp_len < self.comp_threshold:
+                    raise ProtoException("proto error: sent compressed packet below threshold")
                 del buf[:n]
-                buf = zlib.decompress(buf, bufsize=uncomp_len)
-                if len(buf) is not uncomp_len:
-                    raise "proto error: uncompressed size doesn't match expected"
+                if uncomp_len is not 0:
+                    buf = zlib.decompress(buf, bufsize=uncomp_len)
+                    if len(buf) is not uncomp_len:
+                        raise ProtoException("proto error: uncompressed size doesn't match expected")
 
             return buf
         finally:

@@ -1,4 +1,5 @@
 import aiohttp
+from Crypto.Hash import SHA
 import json
 
 class AuthError(Exception):
@@ -42,16 +43,23 @@ class AuthAPI(object):
 
     def __init__(self, proxy_generator=None):
         self.__default_agent = {"name": "Minecraft", "version": 1}
-        self.__baseurl = "https://authserver.mojang.com"
+        self.__authurl = "https://authserver.mojang.com"
+        self.__sessionurl = "https://sessionserver.mojang.com"
         self.__session = None
 
     async def __force_session(self):
         if self.__session is None:
             self.__session = aiohttp.ClientSession()
 
-    async def make_api_request(self, endpoint, payload):
+    async def make_auth_request(self, endpoint, payload):
+        return await self.make_api_request(self.__authurl, endpoint, payload)
+
+    async def make_session_request(self, endpoint, payload):
+        return await self.make_api_request(self.__sessionurl, endpoint, payload)
+
+    async def make_api_request(self, base, endpoint, payload):
         await self.__force_session()
-        async with self.__session.post(self.__baseurl + endpoint,
+        async with self.__session.post(base + endpoint,
                 headers={"Content-Type": "application/json"},
                 data=json.dumps(payload)) as response:
             if response.status >= 400:
@@ -94,7 +102,7 @@ class AuthAPI(object):
         if user is True:
             request["requestUser"] = True
 
-        request = await self.make_api_request("/authenticate", request)
+        request = await self.make_auth_request("/authenticate", request)
         profile_data = await request.json()
         
         return Profile(self, username=username, **profile_data)
@@ -105,7 +113,24 @@ class AuthAPI(object):
             "password": password
         }
 
-        await self.make_api_request("/signout", request)
+        await self.make_auth_request("/signout", request)
+
+    async def has_joined(self, username, server_hash):
+        await self.__force_session()
+        async with self.__session.get(self.__sessionurl + 
+                "/session/minecraft/hasJoined?username={}&serverId={}"
+                .format(username, server_hash)) as response:
+            if response.status >= 400:
+                return None
+            
+            return await response.json()
+
+    def gen_server_id(self, server_id, secret, public_key):
+        h = SHA.new()
+        h.update(server_id.encode("ASCII"))
+        h.update(secret)
+        h.update(public_key)
+        return h.hexdigest()
 
 class Profile(object):
     def __init__(self, api, **kwargs):
@@ -126,7 +151,7 @@ class Profile(object):
         if user is True:
             refresh_payload["requestUser"] = True
 
-        response = await self.__api.make_api_request("/refresh", refresh_payload)
+        response = await self.__api.make_auth_request("/refresh", refresh_payload)
         response_data = await response.json()
 
         for kw in response_data:
@@ -135,7 +160,15 @@ class Profile(object):
     async def validate(self):
         validate_payload = self.__create_token_payload()
 
-        await self.__api.make_api_request("/validate", validate_payload)
+        await self.__api.make_auth_request("/validate", validate_payload)
+
+    async def join(self, server_hash):
+        join_payload = {
+            "accessToken": self.accessToken,
+            "selectedProfile": self.selectedProfile['id'],
+            "serverId": server_hash
+        }
+        await self.__api.make_session_request("/session/minecraft/join", join_payload)
 
 class OfflineProfile(object):
     def __init__(self, username):
