@@ -1,5 +1,6 @@
 from json import dumps, loads
 import math
+import nbt
 import struct
 from uuid import UUID
 import varint
@@ -53,6 +54,12 @@ def r_s_long(buf):
 
 def w_s_long(buf, val):
     pack(buf, 'q', val)
+
+def r_u_long(buf):
+    return rip(buf, 'Q', 8)
+
+def w_u_long(buf, val):
+    pack(buf, 'Q', val)
 
 def r_float(buf):
     return rip(buf, 'f', 4)
@@ -131,6 +138,37 @@ def w_v_bytes(buf, b):
     w_vi(buf, len(b))
     buf.extend(b)
 
+def bytearray_buffer(array):
+    def read(n):
+        d = array[:n]
+        del array[:n]
+        return d
+    def write(d):
+        array.extend(d)
+
+    return read, write
+
+def r_nbt(buf):
+    return nbt.TAG_Compound(buffer=bytearray_buffer(buf)[0])
+
+def w_nbt(buf, val):
+    val._render_buffer(bytearray_buffer(buf)[1])
+
+def r_position(buf):
+    val = r_u_long(buf)
+    x = val >> 38
+    y = (val >> 26) & 0xfff
+    z = val & 0x3ffffff
+    if z & (1 << 25):
+        z -= 1(1 << 26)
+    return x, y, z
+
+def w_position(buf, val):
+    val = (int(val[0]) & 0x3ffffff) << 38
+    val |= (int(val[1]) & 0xfff) << 26
+    val |= (int(val[2]) & 0x3ffffff)
+    w_u_long(buf, val)
+
 s_byte = [r_s_byte, w_s_byte]
 u_byte = [r_u_byte, w_u_byte]
 m_bool = [r_bool, w_bool]
@@ -147,3 +185,20 @@ s_uuid = [r_s_uuid, w_s_uuid]
 u8 = [r_u8, w_u8]
 json = [r_json, w_json]
 v_bytes = [r_v_bytes, w_v_bytes]
+position = [r_position, w_position]
+m_nbt = [r_nbt, w_nbt]
+
+def opt(serializer):
+    def r_opt(buf):
+        e = r_bool(buf)
+        if e:
+            return serializer[0](buf)
+        return None
+    def w_opt(buf, val):
+        if val is None:
+            w_bool(buf, False)
+        else:
+            w_bool(buf, True)
+            serializer[1](buf, val)
+    return [r_opt, w_opt]
+
