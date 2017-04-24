@@ -1,4 +1,5 @@
 import login
+import play
 from primative import r_vi
 import status
 
@@ -71,6 +72,121 @@ class LoginState(ProtoState):
 class PlayState(ProtoState):
     def __init__(self, server=False):
         super().__init__(server)
+        cb = [
+            play.PlaySpawnObjectPacketSerializer,
+            play.PlaySpawnExpOrbPacketSerializer,
+            play.PlaySpawnGlobalEntityPacketSerializer,
+            play.PlaySpawnMobPacketSerializer,
+            play.PlaySpawnPaintingPacketSerializer,
+            play.PlaySpawnPlayerPacketSerializer,
+            play.PlayerAnimationPacketSerializer,
+            play.PlayStatisticsPacketSerializer,
+            play.PlayBlockBreakAnimationPacketSerializer,
+            play.PlayUpdateBlockEntityPacketSerializer,
+            play.PlayBlockActionPacketSerializer,
+            play.PlayBlockChangePacketSerializer,
+            play.PlayBossBarPacketSerializer,
+            play.PlayDifficultyPacketSerializer,
+            play.PlayTabCompleteResponsePacketSerializer,
+            play.PlayChatPacketSerializer,
+            play.PlayMultiBlockChangePacketSerializer,
+            play.PlayConfirmInvTransactionPacketSerializer,
+            play.PlayCloseWindowPacketSerializer,
+            play.PlayOpenWindowPacketSerializer,
+            play.PlayWindowItemsPacketSerializer,
+            play.PlayWindowPropertyPacketSerializer,
+            play.PlaySetSlotPacketSerializer,
+            play.PlaySetCooldownPacketSerializer,
+            play.PlayPluginMessageClientBoundPacketSerializer,
+            play.PlayNamedSoundEffectPacketSerializer,
+            play.PlayKickPacketSerializer,
+            play.PlayEntityStatusPacketSerializer,
+            play.PlayExplosionPacketSerializer,
+            play.PlayUnloadChunkPacketSerializer,
+            play.PlayChangeGameStatePacketSerializer,
+            play.PlayKeepAliveClientBoundPacketSerializer,
+            play.PlayChunkDataPacketSerializer,
+            play.PlayEffectPacketSerializer,
+            play.PlayParticlePacketSerializer,
+            play.PlayMapPacketSerializer,
+            play.PlayEntityRelativeMovePacketSerializer,
+            play.PlayEntityLookAndRelativeMovePacketSerializer,
+            play.PlayEntityLookPacketSerializer,
+            play.PlayEntityPacketSerializer,
+            play.PlayVehicleMoveClientBoundPacketSerializer,
+            play.PlayOpenSignEditorPacketSerializer,
+            play.PlayPlayerAbilitiesClientBoundPacketSerializer,
+            play.PlayCombatEventPacketSerializer,
+            play.PlayPlayerListItemPacketSerializer,
+            play.PlayPlayerPositionAndLookPacketSerializer,
+            play.PlayUseBedPacketSerializer,
+            play.PlayDestroyEntitiesPacketSerializer,
+            play.PlayRemoveEntityEffectPacketSerializer,
+            play.PlayResourcePackPacketSerializer,
+            play.PlayrespawnPacketSerializer,
+            play.PlayEntityHeadLookPacketSerializer,
+            play.PlayWorldBorderPacketSerializer,
+            play.PlayCameraPacketSerializer,
+            play.PlayHeldItemChangeClientBoundPacketSerializer,
+            play.PlayDisplayScoreboardPacketSerializer,
+            play.PlayEntityMetadataPacketSerializer,
+            play.PlayAttachEntityPacketSerializer,
+            play.PlayEntityVelocityPacketSerializer,
+            play.PlayEntityEquipmentPacketSerializer,
+            play.PlaySetExperiencePacketSerializer,
+            play.PlayUpdateHealthPacketSerializer,
+            play.PlayScoreboardObjectivePacketSerializer,
+            play.PlaySetPassengersPacketSerializer,
+            play.PlayTeamsPacketSerializer,
+            play.PlayUpdateScorePacketSerializer,
+            play.PlaySpawnPositionPacketSerializer,
+            play.PlayTimeUpdatePacketSerializer,
+            play.PlayTitlePacketserializer,
+            play.PlaySoundEffectPacketSerializer,
+            play.PlayPlayerListHeaderFooterPacketSerializer,
+            play.PlayCollectItemPacketSerializer,
+            play.PlayEntityTeleportPacketSerializer,
+            play.PlayEntityPropertiesPacketSerializer,
+            play.PlayEntityEffectPacketSerializer
+        ]
+
+        sb = [
+            play.PlayTeleportConfirmPacketSerializer,
+            play.PlayTabCompleteRequestPacketSerializer,
+            play.PlayChatMessageServerBoundPacketSerializer,
+            play.PlayClientStatusPacketSerializer,
+            play.PlayClientSettingsPacketSerializer,
+            play.PlayConfirmInvTransactionServerBoundPacketSerializer,
+            play.PlayEnchantItemPacketSerializer,
+            play.PlayClickWindowPacketSerializer,
+            play.PlayCloseWindowServerBoundPacketSerializer,
+            play.PlayPluginMessageServerBoundPacketSerializer,
+            play.PlayUseEntityPacketSerializer,
+            play.PlayKeepAliveServerBoundPacketSerializer,
+            play.PlayPlayerPositionPacketSerializer,
+            play.PlayPlayerLookPacketSerializer,
+            play.PlayPlayerPacketSerializer
+            play.PlayVehicleMoveServerBoundPacketSerializer,
+            play.PlaySteerBoatPacketSerializer,
+            play.PlayPlayerAbilitiesServerBoundPacketSerializer,
+            play.PlayDiggingPacketSerializer,
+            play.PlayEntityActionPacketSerializer,
+            play.PlaySteerVehiclePacketSerializer,
+            play.PlayResourcePackStatusPacketSerializer,
+            play.PlayHeldItemChangeServerBoundPacketSerializer,
+            play.PlayCreativeInvActionPacketSerializer,
+            play.PlayUpdateSignPacketSerializer,
+            play.PlayAnimationServerBoundPacketSerializer,
+            play.PlaySpectatePacketSerializer,
+            play.PlayblockPlacementPacketSerializer,
+            play.PlayUseItemPacketSerializer
+        ]
+
+        for c in cb:
+            self.register(c(), False)
+
+        for s in sb:
+            self.register(s(), True)
 
 class StateAdapter():
     def __init__(self, raw_source, raw_sink, initial_state):

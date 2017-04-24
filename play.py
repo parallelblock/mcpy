@@ -102,7 +102,7 @@ class PlaySpawnMobPacket():
         self.vz = vz
         self.metadata = metadata
 
-class PlayerSpawnMobPacketSerializer(PacketSerializer):
+class PlaySpawnMobPacketSerializer(PacketSerializer):
     def __init__(self):
         self.id = 3
         self.fields = [
@@ -119,7 +119,7 @@ class PlayerSpawnMobPacketSerializer(PacketSerializer):
             ["vy", primative.s_short],
             ["vz", primative.s_short],
             ["metadata", metadata.meta_type]]
-        self.type = PlayerSpawnMobPacket
+        self.type = PlaySpawnMobPacket
 
 class PlaySpawnPaintingPacket():
     def __init__(self, e_id, e_uuid, title, location, direction):
@@ -129,7 +129,7 @@ class PlaySpawnPaintingPacket():
         self.location = location
         self.direction = direction
 
-class PlayerSpawnPaintingPacketSerializer(PacketSerializer):
+class PlaySpawnPaintingPacketSerializer(PacketSerializer):
     def __init__(self):
         self.id = 4
         self.fields = [
@@ -151,7 +151,7 @@ class PlaySpawnPlayerPacket():
         self.pitch = pitch
         self.metadata = metadata
 
-class PlayerSpawnPlayerPacketSerializer(PacketSerializer):
+class PlaySpawnPlayerPacketSerializer(PacketSerializer):
     def __init__(self):
         self.id = 5
         self.fields = [
@@ -170,19 +170,19 @@ class PlayAnimationPacket():
         self.e_id = e_id
         self.animation = animation
 
-class PlayerAnimationPacketSerializer(PacketSerializer):
+class PlayAnimationPacketSerializer(PacketSerializer):
     def __init__(self):
         self.id = 6
         self.fields = [
             ["e_id", primative.vi],
             ["animation", primative.u_byte]]
-        self.type = PlayerAnimationPacket
+        self.type = PlayAnimationPacket
 
 class PlayStatisticsPacket():
     def __init__(self, statistics={}):
         self.statistics = statistics
 
-class PlayerStatisticsPacketSerializer():
+class PlayStatisticsPacketSerializer():
     def __init__(self):
         self.id = 7
         self.type = PlayStatisticsPacket
@@ -418,7 +418,7 @@ class PlayMultiBlockChangePacket():
         self.c_y = c_y
         self.records = records
 
-class PlayTabCompleteResponsePacketSerializer():
+class PlayMultiBlockChangePacketSerializer():
     def __init__(self):
         self.id = 0x10
         self.type = PlayMultiBlockChangePacket
@@ -581,12 +581,12 @@ class PlaySetCooldownPacketSerializer(PacketSerializer):
             ["cooldown", primative.vi]]
         self.type = PlaySetCooldownPacket
 
-class PlayPluginMessageClientboundPacket():
+class PlayPluginMessageClientBoundPacket():
     def __init__(self, channel, data):
         self.channel = channel
         self.data = data
 
-class PlayPluginMessageClientboundPacketSerializer():
+class PlayPluginMessageClientBoundPacketSerializer():
     def __init__(self):
         self.id = 0x18
         self.type = PlayPluginMessageClientboundPacket
@@ -720,11 +720,11 @@ class PlayChangeGameStatePacketSerializer(PacketSerializer):
             ["value", primative.m_float]]
         self.type = PlayChangeGameStatePacket
 
-class PlayKeepAliveClientboundPacket():
+class PlayKeepAliveClientBoundPacket():
     def __init__(self, ka_id):
         self.ka_id = ka_id
 
-class PlayKeepAliveClientboundPacketSerializer(PacketSerializer):
+class PlayKeepAliveClientBoundPacketSerializer(PacketSerializer):
     def __init__(self):
         self.id = 0x1f
         self.fields =[["ka_id", primative.vi]]
@@ -748,7 +748,7 @@ class PlayEffectPacket():
         self.data = data
         self.disable_relative_volume = disable_relative_volume
 
-class PlayEffectPacketSerialier(PacketSerializer):
+class PlayEffectPacketSerializer(PacketSerializer):
     def __init__(self):
         self.id = 0x21
         self.fields = [
@@ -774,7 +774,7 @@ class PlayParticlePacket():
         self.b_data1 = b_data1
         self.b_data2 = b_data2
 
-class PlayParticlePacketSerialier(PacketSerializer):
+class PlayParticlePacketSerializer(PacketSerializer):
     def __init__(self):
         self.id = 0x22
         self.fields = [
@@ -797,7 +797,7 @@ class PlayMapPacket():
     def __init__(self):
         pass
 
-class PlayMapPacketSerialier(PacketSerializer):
+class PlayMapPacketSerializer(PacketSerializer):
     def __init__(self):
         self.id = 0x24
         self.fields = []
@@ -811,7 +811,7 @@ class PlayEntityRelativeMovePacket():
         self.z = z
         self.on_ground = on_ground
 
-class PlayEntityRelativeMovePacketSerialier(PacketSerializer):
+class PlayEntityRelativeMovePacketSerializer(PacketSerializer):
     def __init__(self):
         self.id = 0x25
         self.fields = [
@@ -832,7 +832,7 @@ class PlayEntityLookAndRelativeMovePacket():
         self.pitch = pitch
         self.on_ground = on_ground
 
-class PlayEntityLookAndRelativeMovePacketSerialier(PacketSerializer):
+class PlayEntityLookAndRelativeMovePacketSerializer(PacketSerializer):
     def __init__(self):
         self.id = 0x26
         self.fields = [
@@ -852,7 +852,7 @@ class PlayEntityLookPacket():
         self.pitch = pitch
         self.on_ground = on_ground
 
-class PlayEntityLookPacketSerialier(PacketSerializer):
+class PlayEntityLookPacketSerializer(PacketSerializer):
     def __init__(self):
         self.id = 0x27
         self.fields = [
@@ -1300,12 +1300,12 @@ class PlaySoundEffectPacketSerializer(PacketSerializer):
             ["pitch", primative.m_float]]
         self.type = PlaySoundEffectPacket
 
-class PlayerListHeaderFooterPacket():
+class PlayPlayerListHeaderFooterPacket():
     def __init__(self, header, footer):
         self.header = header
         self.footer = footer
 
-class PlayerListHeaderFooterPacketSerializer(PacketSerializer):
+class PlayPlayerListHeaderFooterPacketSerializer(PacketSerializer):
     def __init__(self):
         self.id = 0x47
         self.fields = [
@@ -1544,7 +1544,7 @@ class PlayUseEntityPacket():
         self.t_z = t_z
         self.hand = hand
 
-class PlayUseEntityPacket(PacketSerializer):
+class PlayUseEntityPacketSerializer(PacketSerializer):
     def __init__(self):
         self.id = 0x0a
         self.fields = [
@@ -1556,7 +1556,6 @@ class PlayKeepAliveServerBoundPacket():
     def __init__(self, ka_id):
         self.ka_id = ka_id
         
-
 class PlayKeepAliveServerBoundPacketSerializer(PacketSerializer):
     def __init__(self):
         self.id = 0x0b
@@ -1801,4 +1800,3 @@ class PlayUseItemPacketSerializer(PacketSerializer):
         self.fields = [
             ["hand", primative.vi]]
         self.type = PlayUseItemPacket
-
