@@ -2,6 +2,18 @@ import metadata
 import primative
 from serializer import PacketSerializer
 
+#    ____  _____ ______     _______ ____        __  
+#   / ___|| ____|  _ \ \   / / ____|  _ \       \ \ 
+#   \___ \|  _| | |_) \ \ / /|  _| | |_) |  _____\ \
+#    ___) | |___|  _ < \ V / | |___|  _ <  |_____/ /
+#   |____/|_____|_| \_\ \_/  |_____|_| \_\      /_/ 
+#                                                   
+#     ____ _     ___ _____ _   _ _____ 
+#    / ___| |   |_ _| ____| \ | |_   _|
+#   | |   | |    | ||  _| |  \| | | |  
+#   | |___| |___ | || |___| |\  | | |  
+#    \____|_____|___|_____|_| \_| |_|  
+
 class PlaySpawnObjectPacket():
     def __init__(self, eid, uuid, o_type, x, y, z, pitch, yaw, data, vx, vy, vz):
         self.eid = eid
@@ -628,7 +640,7 @@ class PlayEntityStatusPacket():
         self.e_id = e_id
         self.status = status
 
-class PlayEntityStatusPacketSerializer(PacketSerialier):
+class PlayEntityStatusPacketSerializer(PacketSerializer):
     def __init__(self):
         self.id = 0x1b
         self.fields = [
@@ -712,7 +724,7 @@ class PlayKeepAliveClientboundPacket():
     def __init__(self, ka_id):
         self.ka_id = ka_id
 
-class PlayKeepAliveClientboundPacketSerializer(PacketSerialier):
+class PlayKeepAliveClientboundPacketSerializer(PacketSerializer):
     def __init__(self):
         self.id = 0x1f
         self.fields =[["ka_id", primative.vi]]
@@ -1371,4 +1383,422 @@ class PlayEntityEffectPacketSerializer(PacketSerializer):
             ["flags", primative.s_byte]]
         self.type = PlayEntityEffectPacket
 
+
+#     ____ _     ___ _____ _   _ _____       __  
+#    / ___| |   |_ _| ____| \ | |_   _|      \ \ 
+#   | |   | |    | ||  _| |  \| | | |    _____\ \
+#   | |___| |___ | || |___| |\  | | |   |_____/ /
+#    \____|_____|___|_____|_| \_| |_|        /_/ 
+#                                                
+#    ____  _____ ______     _______ ____  
+#   / ___|| ____|  _ \ \   / / ____|  _ \ 
+#   \___ \|  _| | |_) \ \ / /|  _| | |_) |
+#    ___) | |___|  _ < \ V / | |___|  _ < 
+#   |____/|_____|_| \_\ \_/  |_____|_| \_\
+
+class PlayTeleportConfirmPacket():
+    def __init__(self, t_id):
+        self.t_id = t_id
+
+class PlayTeleportConfirmPacketSerializer(PacketSerializer):
+    def __init__(self):
+        self.id = 0x00
+        self.fields = [["t_id", primative.vi]]
+        self.type = PlayTeleportConfirmPacket
+
+class PlayTabCompleteRequestPacket():
+    def __init__(self, text, assume_command, looked_at_block=None):
+        self.text = text
+        self.assume_command = assume_command
+        self.looked_at_block = looked_at_block
+
+class PlayTabCompleteRequestPacketSerializer(PacketSerializer):
+    def __init__(self):
+        self.id = 0x01
+        self.fields = [
+            ["text", primative.u8],
+            ["assume_command", primative.m_bool],
+            ["looked_at_block", primative.opt(primative.position)]],
+        self.type = PlayTabCompleteRequestPacket
+
+class PlayChatMessageServerBoundPacket():
+    def __init__(self, message):
+        self.message = message
+
+class PlayChatMessageServerBoundPacketSerializer(PacketSerializer):
+    def __init__(self):
+        self.id = 0x02
+        self.fields = [["message", primative.u8]]
+        self.type = PlayChatMessageServerBoundPacket
+
+class PlayClientStatusPacket():
+    def __init__(self, action):
+        self.action = action
+
+class PlayClientStatusPacketSerializer(PacketSerializer):
+    def __init__(self):
+        self.id = 0x03
+        self.fields = [
+            ["action", primative.vi]]
+        self.type = PlayClientStatusPacket
+
+class PlayClientSettingsPacket():
+    def __init__(self, locale, view_distance, chat_mode, colors, 
+            displayed_skin_parts, main_hand):
+        self.locale = locale
+        self.view_distance = view_distance
+        self.chat_mode = chat_mode
+        self.colors = colors
+        self.displayed_skin_parts = displayed_skin_parts
+        self.main_hand = main_hand
+
+class PlayClientSettingsPacketSerializer(PacketSerializer):
+    def __init__(self):
+        self.id = 0x04
+        self.fields = [
+            ["locale", primative.u8],
+            ["view_distance", primative.s_byte],
+            ["chat_mode", primative.vi],
+            ["colors", primative.m_bool],
+            ["displayed_skin_parts", primative.u_byte],
+            ["main_hand", primative.vi]]
+        self.type = PlayClientSettingsPacket
+
+class PlayConfirmInvTransactionServerBoundPacket():
+    def __init__(self, w_id, action, accepted):
+        self.w_id = w_id
+        self.action = action
+        self.accepted = accepted
+
+class PlayConfirmInvTransactionServerBoundPacketSerializer(PacketSerializer):
+    def __init__(self):
+        self.id = 0x05
+        self.fields = [
+            ["w_id", primative.s_byte],
+            ["action", primative.s_short],
+            ["accepted", primative.m_bool]]
+        self.type = PlayConfirmInvTransactionServerBoundPacket
+
+class PlayEnchantItemPacket():
+    def __init__(self, w_id, enchantment):
+        self.w_id = w_id
+        self.enchantment = enchantment
+
+class PlayEnchantItemPacketSerializer(PacketSerializer):
+    def __init__(self):
+        self.id = 0x06
+        self.fields = [
+            ["w_id", primative.s_byte],
+            ["enchantment", primative.s_byte]]
+        self.type = PlayEnchantItemPacket
+
+class PlayClickWindowPacket():
+    def __init__(self, w_id, slot, button, action, mode, clicked_item):
+        self.w_id = w_id
+        self.slot = slot
+        self.button = button
+        self.action = action
+        self.mode = mode
+        self.clicked_item = clicked_item
+
+class PlayClickWindowPacketSerializer(PacketSerializer):
+    def __init__(self):
+        self.id = 0x07
+        self.fields = [
+            ["w_id", primative.u_byte],
+            ["slot", primative.s_short],
+            ["button", primative.u_byte],
+            ["action", primative.s_short],
+            ["mode", primative.vi],
+            ["clicked_item", [primative.r_slot, primative.w_slot]]]
+        self.type = PlayClickWindowPacket
+
+class PlayCloseWindowServerBoundPacket():
+    def __init__(self, w_id):
+        self.w_id = w_id
+
+class PlayCloseWindowServerBoundPacketSerializer(PacketSerializer):
+    def __init__(self):
+        self.id = 0x08
+        self.fields = [["w_id", primative.u_byte]]
+        self.type = PlayCloseWindowServerBoundPacket
+
+class PlayPluginMessageServerBoundPacket():
+    def __init__(self, channel, data):
+        self.channel = channel
+        self.data = data
+
+class PlayPluginMessageServerBoundPacketSerializer(
+        PlayPluginMessageClientboundPacketSerializer):
+    def __init__(self):
+        self.id = 0x09
+        self.type = PlayPluginMessageServerBoundPacket
+
+# TODO: Implement
+class PlayUseEntityPacket():
+    def __init__(self, target, e_type, t_x=None, t_y=None, t_z=None, hand=None):
+        self.target = target
+        self.e_type = e_type
+        self.t_x = t_x
+        self.t_y = t_y
+        self.t_z = t_z
+        self.hand = hand
+
+class PlayUseEntityPacket(PacketSerializer):
+    def __init__(self):
+        self.id = 0x0a
+        self.fields = [
+            ["target", primative.vi],
+            ["type", primative.vi]]
+        self.type = PlayUseEntityPacket
+
+class PlayKeepAliveServerBoundPacket():
+    def __init__(self, ka_id):
+        self.ka_id = ka_id
+        
+
+class PlayKeepAliveServerBoundPacketSerializer(PacketSerializer):
+    def __init__(self):
+        self.id = 0x0b
+        self.fields = [
+            ["ka_id", primative.vi]]
+
+class PlayPlayerPositionPacket():
+    def __init__(self, x, y, z, on_ground):
+        self.x = x
+        self.y = y
+        self.z = z
+        self.on_ground = on_ground
+
+class PlayPlayerPositionPacketSerializer(PacketSerializer):
+    def __init__(self):
+        self.id = 0x0c
+        self.fields = [
+            ["x", primative.m_double],
+            ["y", primative.m_double],
+            ["z", primative.m_double],
+            ["on_ground", primative.m_bool]]
+        self.type = PlayPlayerPositionPacket
+
+class PlayPlayerLookPacket():
+    def __init__(self, yaw, pitch, on_ground):
+        self.yaw = yaw
+        self.pitch = pitch
+        self.on_ground = on_ground
+
+class PlayPlayerLookPacketSerializer(PacketSerializer):
+    def __init__(self):
+        self.id = 0x0e
+        self.fields = [
+            ["yaw", primative.m_float],
+            ["pitch", primative.m_float],
+            ["on_ground", primative.m_bool]]
+        self.type = PlayPlayerLookPacket
+
+class PlayPlayerPacket():
+    def __init__(self, on_ground):
+        self.on_ground = on_ground
+
+class PlayPlayerPacketSerializer(PacketSerializer):
+    def __init__(self):
+        self.id = 0x0f
+        self.type = PlayPlayerPacket
+
+class PlayVehicleMoveServerBoundPacket():
+    def __init__(self, x, y, z, yaw, pitch):
+        self.x = x
+        self.y = y
+        self.z = z
+        self.yaw = yaw
+        self.pitch = pitch
+    
+class PlayVehicleMoveServerBoundPacketSerializer(PacketSerializer):
+    def __init__(self):
+        self.id = 0x10
+        self.fields = [
+            ["x", primative.m_double],
+            ["y", primative.m_double],
+            ["z", primative.m_double],
+            ["yaw", primative.m_float],
+            ["float", primative.m_float]]
+        self.type = PlayVehicleMoveServerBoundPacket
+
+class PlaySteerBoatPacket():
+    def __init__(self, right_paddle, left_paddle):
+        self.right_paddle = right_paddle
+        self.left_paddle = left_paddle
+
+class PlaySteerBoatPacketSerializer(PacketSerializer):
+    def __init__(self):
+        self.id = 0x11
+        self.fields = [
+            ["right_paddle", primative.m_bool],
+            ["left_paddle", primative.m_bool]]
+        self.type = PlaySteerBoatPacket
+
+class PlayPlayerAbilitiesServerBoundPacket():
+    def __init__(self, flags, flying_speed, walking_speed):
+        self.flags = flags
+        self.flying_speed = flying_speed
+        self.walking_speed = walking_speed
+
+class PlayPlayerAbilitiesServerBoundPacketSerializer(PacketSerializer):
+    def __init__(self):
+        self.id = 0x12
+        self.fields = [
+            ["flags", primative.s_byte],
+            ["flying_speed", primative.m_float],
+            ["walking_speed", primative.m_float]]
+        self.type = PlayPlayerAbilitiesServerBoundPacket
+
+class PlayDiggingPacket():
+    def __init__(self, status, location, face):
+        self.status = status
+        self.location = location
+        self.face = face
+
+class PlayDiggingPacketSerializer(PacketSerializer):
+    def __init__(self):
+        self.id = 0x13
+        self.fields = [
+            ["status", primative.vi],
+            ["location", primative.position],
+            ["face", primative.s_byte]]
+        self.type = PlayDiggingPacket
+
+class PlayEntityActionPacket():
+    def __init__(self, e_id, action_id, jump_boost):
+        self.e_id = e_id
+        self.action_id = action_id
+        self.jump_boost = jump_boost
+
+class PlayEntityActionPacketSerializer(PacketSerializer):
+    def __init__(self):
+        self.id = 0x14
+        self.fields = [
+            ["e_id", primative.vi],
+            ["action_id", primative.vi],
+            ["jump_boost", primative.vi]]
+        self.type = PlayEntityActionPacket
+
+class PlaySteerVehiclePacket():
+    def __init__(self, sideways, forward, flags):
+        self.sideways = sideways
+        self.forward = forward
+        self.flags = flags
+
+class PlaySteerVehiclePacketSerializer(PacketSerializer):
+    def __init__(self):
+        self.id = 0x15
+        self.fields = [
+            ["sideways", primative.m_float],
+            ["forward", primative.m_float],
+            ["flags", primative.u_byte]]
+        self.type = PlaySteerVehiclePacket
+
+class PlayResourcePackStatusPacket():
+    def __init__(self, result):
+        self.result = result
+
+class PlayResourcePackStatusPacketSerializer(PacketSerializer):
+    def __init__(self):
+        self.id = 0x16
+        self.fields = [["result", primative.vi]]
+        self.type = PlayResourcePackStatusPacket
+
+class PlayHeldItemChangeServerBoundPacket():
+    def __init__(self, slot):
+        self.slot = slot
+    
+class PlayHeldItemChangeServerBoundPacketSerializer(PacketSerializer):
+    def __init__(self):
+        self.id = 0x17
+        self.fields = [
+            ["slot", primative.s_short]]
+        self.type = PlayHeldItemChangeServerBoundPacket
+
+class PlayCreativeInvActionPacket():
+    def __init__(self, slot, item):
+        self.slot = slot
+        self.item = item
+
+class PlayCreativeInvActionPacketSerializer(PacketSerializer):
+    def __init__(self):
+        self.id = 0x18
+        self.fields = [
+            ["slot", primative.s_short],
+            ["item" [primative.r_slot, primative.w_slot]]]
+        self.type = PlayCreativeInvActionPacket
+
+class PlayUpdateSignPacket():
+    def __init__(self, location, line1, line2, line3, line4):
+        self.location = location
+        self.line1 = line1
+        self.line2 = line2
+        self.line3 = line3
+        self.line4 = line4
+
+class PlayUpdateSignPacketSerializer(PacketSerializer):
+    def __init__(self):
+        self.id = 0x19
+        self.fields = [
+            ["location", primative.position],
+            ["line1", primative.u8],
+            ["line2", primative.u8],
+            ["line3", primative.u8],
+            ["line4", priamtive.u8]]
+        self.type = PlayUpdateSignPacket
+
+class PlayAnimationServerBoundPacket():
+    def __init__(self, hand):
+        self.hand = hand
+
+class PlayAnimationServerBoundPacketSerializer(PacketSerializer):
+    def __init__(self):
+        self.id = 0x1a
+        self.fields = [
+            ["hand", primative.vi]]
+        self.type = PlayAnimationServerBoundPacket
+
+class PlaySpectatePacket():
+    def __init__(self, target):
+        self.target = target
+
+class PlaySpectatePacketSerializer(PacketSerializer):
+    def __init__(self):
+        self.id = 0x1b
+        self.fields = [["target", primative.uuid]]
+        self.type = PlaySpectatePacket
+
+class PlayBlockPlacementPacket():
+    def __init__(self, location, face, hand, x, y, z):
+        self.location = location
+        self.face = face
+        self.hand = hand
+        self.x = x
+        self.y = y
+        self.z = z
+
+class PlayBlockPlacementPacketSerializer(PacketSerializer):
+    def __init__(self):
+        self.id = 0x1c
+        self.fields = [
+            ["location", primative.position],
+            ["face", primative.vi],
+            ["hand", primative.vi],
+            ["x", primative.m_float],
+            ["y", primative.m_float],
+            ["z", primative.m_float]]
+        self.type = PlayBlockPlacementPacket
+
+class PlayUseItemPacket():
+    def __init__(self, hand):
+        self.hand = hand
+
+class PlayUseItemPacketSerializer(PacketSerializer):
+    def __init__(self):
+        self.id = 0x1d
+        self.fields = [
+            ["hand", primative.vi]]
+        self.type = PlayUseItemPacket
 
