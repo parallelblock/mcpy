@@ -202,3 +202,13 @@ def opt(serializer):
             serializer[1](buf, val)
     return [r_opt, w_opt]
 
+def maybe(serializer):
+    def r_maybe(buf):
+        if len(buf) == 0:
+            return None
+        return serializer[0](buf)
+    def w_maybe(buf, val):
+        if val is None:
+            return
+        serializer[1](buf)
+    return [r_maybe, w_maybe]
