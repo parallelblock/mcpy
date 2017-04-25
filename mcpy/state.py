@@ -1,7 +1,5 @@
-import login
-import play
-from primative import r_vi
-import status
+from mcpy import login, play, primative, status
+r_vi = primative.r_vi
 
 class StateException(Exception):
     pass
@@ -17,7 +15,7 @@ class ProtoState():
         p = self.inbound.get(p_id)
 
         if p is None:
-            raise "state: no packet with id {}".format(p_id)
+            raise StateException("state: no packet with id {0} (0x{0:02X}) state: {1}".format(p_id, self))
         try:
             return p.deserialize(buf)
         except:
@@ -79,7 +77,7 @@ class PlayState(ProtoState):
             play.PlaySpawnMobPacketSerializer,
             play.PlaySpawnPaintingPacketSerializer,
             play.PlaySpawnPlayerPacketSerializer,
-            play.PlayerAnimationPacketSerializer,
+            play.PlayAnimationPacketSerializer,
             play.PlayStatisticsPacketSerializer,
             play.PlayBlockBreakAnimationPacketSerializer,
             play.PlayUpdateBlockEntityPacketSerializer,
@@ -108,6 +106,7 @@ class PlayState(ProtoState):
             play.PlayChunkDataPacketSerializer,
             play.PlayEffectPacketSerializer,
             play.PlayParticlePacketSerializer,
+            play.PlayJoinGamePacketSerializer,
             play.PlayMapPacketSerializer,
             play.PlayEntityRelativeMovePacketSerializer,
             play.PlayEntityLookAndRelativeMovePacketSerializer,
@@ -123,7 +122,7 @@ class PlayState(ProtoState):
             play.PlayDestroyEntitiesPacketSerializer,
             play.PlayRemoveEntityEffectPacketSerializer,
             play.PlayResourcePackPacketSerializer,
-            play.PlayrespawnPacketSerializer,
+            play.PlayRespawnPacketSerializer,
             play.PlayEntityHeadLookPacketSerializer,
             play.PlayWorldBorderPacketSerializer,
             play.PlayCameraPacketSerializer,
@@ -141,7 +140,7 @@ class PlayState(ProtoState):
             play.PlayUpdateScorePacketSerializer,
             play.PlaySpawnPositionPacketSerializer,
             play.PlayTimeUpdatePacketSerializer,
-            play.PlayTitlePacketserializer,
+            play.PlayTitlePacketSerializer,
             play.PlaySoundEffectPacketSerializer,
             play.PlayPlayerListHeaderFooterPacketSerializer,
             play.PlayCollectItemPacketSerializer,
@@ -165,7 +164,7 @@ class PlayState(ProtoState):
             play.PlayKeepAliveServerBoundPacketSerializer,
             play.PlayPlayerPositionPacketSerializer,
             play.PlayPlayerLookPacketSerializer,
-            play.PlayPlayerPacketSerializer
+            play.PlayPlayerPacketSerializer,
             play.PlayVehicleMoveServerBoundPacketSerializer,
             play.PlaySteerBoatPacketSerializer,
             play.PlayPlayerAbilitiesServerBoundPacketSerializer,
@@ -178,7 +177,7 @@ class PlayState(ProtoState):
             play.PlayUpdateSignPacketSerializer,
             play.PlayAnimationServerBoundPacketSerializer,
             play.PlaySpectatePacketSerializer,
-            play.PlayblockPlacementPacketSerializer,
+            play.PlayBlockPlacementPacketSerializer,
             play.PlayUseItemPacketSerializer
         ]
 

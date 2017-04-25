@@ -1,5 +1,6 @@
-import primative
-from serializer import PacketSerializer
+from mcpy import primative, serializer
+
+PacketSerializer = serializer.PacketSerializer
 
 class LoginDisconnectPacket():
     def __init__(self, reason):

@@ -1,4 +1,4 @@
-import primative
+from mcpy import primative
 
 class PacketSerializer(object):
 

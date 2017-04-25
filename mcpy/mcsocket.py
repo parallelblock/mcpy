@@ -4,7 +4,7 @@ import zlib
 
 from Crypto.Cipher import AES
 
-import varint
+from mcpy import varint
 
 class ProtoException(Exception):
     pass
@@ -88,19 +88,28 @@ class MinecraftSocketAdapter:
 
             if packet_len is -1:
                 raise ProtoException("proto error: packet length varint overran")
-                
             dat = await self._read_bytes(n=packet_len-len(buf), exact=True)
             buf.extend(dat)
+            assert len(buf) == packet_len
 
             if self.comp_threshold >= 0:
                 uncomp_len, n = varint.read_int(buf)
-                if uncomp_len is not 0 and uncomp_len < self.comp_threshold:
-                    raise ProtoException("proto error: sent compressed packet below threshold")
+                if uncomp_len != 0 and uncomp_len < self.comp_threshold:
+                    raise ProtoException("proto error: sent compressed packet below threshold. Threshold: {}, sent: {}"
+                            .format(self.comp_threshold, uncomp_len))
                 del buf[:n]
-                if uncomp_len is not 0:
-                    buf = zlib.decompress(buf, bufsize=uncomp_len)
-                    if len(buf) is not uncomp_len:
-                        raise ProtoException("proto error: uncompressed size doesn't match expected")
+                if uncomp_len != 0:
+                    try:
+                        buf = zlib.decompress(buf, bufsize=uncomp_len)
+                    except zlib.error as e:
+                        raise ProtoException("Error decopmressing stream: {} from buf {} to len {}"
+                                .format(e, buf, uncomp_len))
+                    if len(buf) != uncomp_len:
+                        raise ProtoException("proto error: uncompressed size doesn't match expected. Expected: {}, actual: {}"
+                                .format(uncomp_len, len(buf)))
+            
+            if not isinstance(buf, bytearray):
+                buf = bytearray(buf)
 
             return buf
         finally:

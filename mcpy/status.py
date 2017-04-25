@@ -1,5 +1,5 @@
-import primative
-from serializer import PacketSerializer
+from mcpy import primative, serializer
+PacketSerializer = serializer.PacketSerializer
 
 class StatusRequestPacket():
     def __init__(self):

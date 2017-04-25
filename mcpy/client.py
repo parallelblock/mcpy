@@ -1,9 +1,5 @@
-import auth
-import connector
-import dns
-import login
-import state
-import status
+from mcpy import auth, connector, dns, login, play, state, status
+
 import time
 import traceback
 
@@ -11,12 +7,15 @@ from Crypto import Random
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_v1_5
 
+import rx
+
 _authapi = auth.AuthAPI()
 _resolver = dns.MCDNSResolver()
 
 _handshake_client_state = state.HandshakeState()
 _status_client_state = state.StatusState()
 _login_client_state = state.LoginState()
+_play_client_state = state.PlayState()
 
 def _current_milli_time():
     return int(round(time.time() * 1000))
@@ -111,6 +110,9 @@ class LoginClient(Client):
 
     async def login(self, profile):
         name = profile.selectedProfile["name"] if hasattr(profile, "selectedProfile") else profile.username
+        if hasattr(profile, "validate"):
+            await profile.validate()
+        
         await self.send_packet(
                 login.LoginStartPacket(name))
         
@@ -131,16 +133,52 @@ class LoginClient(Client):
                 await self.send_packet(
                         login.LoginEncryptionResponsePacket(shared_secret_enc, verify_token))
                 self.start_encryption(shared_secret)
-                print("started encryption")
             elif type(response) is login.LoginSetCompressionPacket:
                 self.start_compression(response.threshold)
             elif type(response) is login.LoginSuccessPacket:
-                return True # todo: new client
+                state_adapter = state.StateAdapter(self.socket.read_packet, self.socket.send_packet,
+                        _play_client_state)
+                return PlayClient(self.socket, state_adapter)
             elif type(response) is login.LoginDisconnectPacket:
                 raise ClientException("login disconnected: reason: {}".format(response.reason))
             else:
                 raise ClientException("login: server responoded with unexpected packet: {}".format(response))
 
+_play_client_scheduler = rx.concurrency.AsyncIOScheduler()
+
+class PlayClient(Client):
+    def __init__(self, socket, state_man):
+        super().__init__(socket, state_man)
+        self._events = {}
+        self.scheduler = _play_client_scheduler
+
+    async def confirm_teleport(self, t_id):
+        await self.send_packet(play.PlayteleportConfirmPacket(t_id))
+
+    def event(self, event, create=True):
+        if create and not event in self._events:
+            s = rx.subjects.Subject()
+            self._events[event] = s
+            return s
+        self._events.get(event, None)
+
+
+    def packet_event(self, packet, create=True):
+        return self.event("__packet.{}".format(type(packet).__name__), create=create)
+
+    async def event_loop_until_close(self):
+        while True:
+            try:
+                pkt = await self.read_packet()
+                try:
+                    subject = self.packet_event(pkt, create=False)
+                    if subject is not None:
+                        subject.on_next(pkt)
+                except:
+                    traceback.print_exc()
+            except Exception as e:
+                raise e
+        
 async def ping_server(address, proto_version=316, ip_port=None):
     socket = await setup_server_connection(address, ip_port)
     

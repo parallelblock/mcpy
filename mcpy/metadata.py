@@ -1,5 +1,4 @@
-import primative
-import types
+from mcpy import primative
 
 def r_rotation(buf):
     x = primative.r_float(buf)
@@ -42,6 +41,8 @@ def w_slot(buf, val):
     primative.w_u_short(buf, val.damage)
     if val.b_id != 0:
         primative.w_nbt(buf, val.nbt)
+
+m_slot = [r_slot, w_slot]
 
 metadata_types = {
     0: primative.u_byte,
@@ -342,7 +343,7 @@ metadata_definitions = {
 class MetadataException(Exception):
     pass
 
-def read_metadata(m_type, buf):
+def read_metadata(buf):
     dat = dict()
     while True:
         index = primative.r_u_byte(buf)
@@ -354,7 +355,7 @@ def read_metadata(m_type, buf):
             raise MetadataException("Invalid metadata type sent")
         dat[index] = (m_type, serializer[0](buf))
 
-    return m_type(dat)
+    return EntityMetadata(dat=dat)
 
 def write_metadata(buf, val):
     for k, v in val.dat:
@@ -381,14 +382,23 @@ class EntityMetadata():
         del self.dat[index]
 
     def __getattr__(self, name):
+        if name == "dat":
+            return super().__getattr__(name)
+
         mdd = metadata_definitions[name]
         return mdd.get(self)
 
     def __setattr__(self, name, value):
+        if name == "dat":
+            super().__setattr__(name, value)
+            return
         mdd = metadata_definitions[name]
         mdd.set(self, value)
 
     def __delattr__(self, name):
+        if name == "dat":
+            super().__delattr__(name)
+            return
         mdd = metadata_definitions[name]
         mdd.rm(self)
 

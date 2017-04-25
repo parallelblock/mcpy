@@ -1,6 +1,5 @@
-import metadata
-import primative
-from serializer import PacketSerializer
+from mcpy import metadata, primative, serializer
+PacketSerializer = serializer.PacketSerializer
 
 #    ____  _____ ______     _______ ____        __  
 #   / ___|| ____|  _ \ \   / / ____|  _ \       \ \ 
@@ -163,7 +162,7 @@ class PlaySpawnPlayerPacketSerializer(PacketSerializer):
             ["yaw", primative.angle],
             ["pitch", primative.angle],
             ["metadata", metadata.meta_type]]
-        self.type = PlayerSpawnPlayerPacket
+        self.type = PlaySpawnPlayerPacket
 
 class PlayAnimationPacket():
     def __init__(self, e_id, animation):
@@ -525,14 +524,14 @@ class PlayWindowItemsPacketSerializer():
         b = bytearray()
         primative.w_vi(b, self.id)
         primative.w_u_byte(b, packet.w_id)
-        primative.w_s_short(b, len(packet.items))
+        primative.w_u_byte(b, len(packet.items))
         for i in packet.items:
             metadata.w_slot(b, i)
         return b
 
     def deserialize(self, b):
         w_id = primative.r_u_byte(b)
-        cnt = primative.r_s_short(b)
+        cnt = primative.r_u_byte(b)
         itms = []
         for i in range(cnt):
             itms.append(metadata.r_slot(b))
@@ -565,7 +564,7 @@ class PlaySetSlotPacketSerializer(PacketSerializer):
         self.fields = [
             ["w_id", primative.u_byte],
             ["slot_num", primative.s_short],
-            ["data", [metadata.r_slot, metadata.w_slot]]]
+            ["data", metadata.m_slot]]
         self.type = PlaySetSlotPacket
 
 class PlaySetCooldownPacket():
@@ -589,7 +588,7 @@ class PlayPluginMessageClientBoundPacket():
 class PlayPluginMessageClientBoundPacketSerializer():
     def __init__(self):
         self.id = 0x18
-        self.type = PlayPluginMessageClientboundPacket
+        self.type = PlayPluginMessageClientBoundPacket
 
     def serialize(self, packet):
         b = bytearray()
@@ -600,7 +599,7 @@ class PlayPluginMessageClientBoundPacketSerializer():
     
     def deserialize(self, buf):
         channel = primative.r_u8(buf)
-        return PlayPluginMessageClientboundPacket(channel, buf)
+        return PlayPluginMessageClientBoundPacket(channel, bytearray(buf[:]))
 
 class PlayNamedSoundEffectPacket():
     def __init__(self, name, catagory, x, y, z, volume, pitch):
@@ -728,14 +727,14 @@ class PlayKeepAliveClientBoundPacketSerializer(PacketSerializer):
     def __init__(self):
         self.id = 0x1f
         self.fields =[["ka_id", primative.vi]]
-        self.type = PlayKeepAliveClientboundPacket
+        self.type = PlayKeepAliveClientBoundPacket
 
 # TODO: Implement this in a sane way
 class PlayChunkDataPacket():
     def __init__(self):
         pass
 
-class PlayChunkDataPacketSerialier(PacketSerializer):
+class PlayChunkDataPacketSerializer(PacketSerializer):
     def __init__(self):
         self.id = 0x20
         self.fields = []
@@ -791,6 +790,30 @@ class PlayParticlePacketSerializer(PacketSerializer):
             ["b_data1", primative.maybe(primative.vi)],
             ["b_data2", primative.maybe(primative.vi)]]
         self.type = PlayParticlePacket
+
+class PlayJoinGamePacket():
+    def __init__(self, e_id, gamemode, dimension, difficulty, max_players,
+            level_type, r_debug):
+        self.e_id = e_id
+        self.gamemode = gamemode
+        self.dimension = dimension
+        self.difficulty = difficulty
+        self.max_players = max_players
+        self.level_type = level_type
+        self.r_debug = r_debug
+
+class PlayJoinGamePacketSerializer(PacketSerializer):
+    def __init__(self):
+        self.id = 0x23
+        self.fields = [
+            ["e_id", primative.s_int],
+            ["gamemode", primative.s_byte],
+            ["dimension", primative.s_int],
+            ["difficulty", primative.u_byte],
+            ["max_players", primative.u_byte],
+            ["level_type", primative.u8],
+            ["r_debug", primative.m_bool]]
+        self.type = PlayJoinGamePacket
 
 # TODO: Implement this in a sane way
 class PlayMapPacket():
@@ -1139,7 +1162,7 @@ class PlayEntityVelocityPacketSerializer(PacketSerializer):
             ["vx", primative.s_short],
             ["vy", primative.s_short],
             ["vz", primative.s_short]]
-        self.type =- PlayEntityVelocityPacket
+        self.type = PlayEntityVelocityPacket
 
 class PlayEntityEquipmentPacket():
     def __init__(self, e_id, slot, item):
@@ -1153,7 +1176,7 @@ class PlayEntityEquipmentPacketSerializer(PacketSerializer):
         self.fields = [
             ["e_id", primative.vi],
             ["slot", primative.vi],
-            ["item", [primative.r_slot, primative.w_slot]]]
+            ["item", metadata.m_slot]]
         self.type = PlayEntityEquipmentPacket
 
 class PlaySetExperiencePacket():
@@ -1311,7 +1334,7 @@ class PlayPlayerListHeaderFooterPacketSerializer(PacketSerializer):
         self.fields = [
             ["header", primative.json],
             ["footer", primative.json]]
-        self.type = PlayerListHeaderFooterPacket
+        self.type = PlayPlayerListHeaderFooterPacket
 
 class PlayCollectItemPacket():
     def __init__(self, collected_eid, collector_eid, count):
@@ -1510,7 +1533,7 @@ class PlayClickWindowPacketSerializer(PacketSerializer):
             ["button", primative.u_byte],
             ["action", primative.s_short],
             ["mode", primative.vi],
-            ["clicked_item", [primative.r_slot, primative.w_slot]]]
+            ["clicked_item", metadata.m_slot]]
         self.type = PlayClickWindowPacket
 
 class PlayCloseWindowServerBoundPacket():
@@ -1529,7 +1552,7 @@ class PlayPluginMessageServerBoundPacket():
         self.data = data
 
 class PlayPluginMessageServerBoundPacketSerializer(
-        PlayPluginMessageClientboundPacketSerializer):
+        PlayPluginMessageClientBoundPacketSerializer):
     def __init__(self):
         self.id = 0x09
         self.type = PlayPluginMessageServerBoundPacket
@@ -1561,6 +1584,7 @@ class PlayKeepAliveServerBoundPacketSerializer(PacketSerializer):
         self.id = 0x0b
         self.fields = [
             ["ka_id", primative.vi]]
+        self.type = PlayKeepAliveServerBoundPacket
 
 class PlayPlayerPositionPacket():
     def __init__(self, x, y, z, on_ground):
@@ -1726,7 +1750,7 @@ class PlayCreativeInvActionPacketSerializer(PacketSerializer):
         self.id = 0x18
         self.fields = [
             ["slot", primative.s_short],
-            ["item" [primative.r_slot, primative.w_slot]]]
+            ["item", metadata.m_slot]]
         self.type = PlayCreativeInvActionPacket
 
 class PlayUpdateSignPacket():
@@ -1745,7 +1769,7 @@ class PlayUpdateSignPacketSerializer(PacketSerializer):
             ["line1", primative.u8],
             ["line2", primative.u8],
             ["line3", primative.u8],
-            ["line4", priamtive.u8]]
+            ["line4", primative.u8]]
         self.type = PlayUpdateSignPacket
 
 class PlayAnimationServerBoundPacket():

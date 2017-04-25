@@ -1,4 +1,5 @@
 import aiohttp
+import asyncio
 from Crypto.Hash import SHA
 import json
 
@@ -46,6 +47,13 @@ class AuthAPI(object):
         self.__authurl = "https://authserver.mojang.com"
         self.__sessionurl = "https://sessionserver.mojang.com"
         self.__session = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        if self.__session is not None:
+            asyncio.ensure_future(self.__session.close())
 
     async def __force_session(self):
         if self.__session is None:
@@ -130,7 +138,12 @@ class AuthAPI(object):
         h.update(server_id.encode("ASCII"))
         h.update(secret)
         h.update(public_key)
-        return h.hexdigest()
+        d = int(h.hexdigest(), 16)
+        if d >> 39 * 4 & 0x8:
+            d = "-{:x}".format((-d) & (2 ** (40 * 4) - 1))
+        else:
+            d = "{:x}".format(d)
+        return d
 
 class Profile(object):
     def __init__(self, api, **kwargs):

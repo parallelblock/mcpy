@@ -1,6 +1,6 @@
 from asyncio import open_connection, start_server
 
-import mcsocket
+from mcpy import mcsocket
 
 async def client_connect(host=None, port=None, **kwargs):
     reader, writer = await open_connection(host, port, **kwargs)

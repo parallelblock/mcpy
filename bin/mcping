@@ -1,0 +1,17 @@
+#!/usr/bin/env python3
+
+import asyncio
+from mcpy import client 
+import sys
+
+async def pingit(url):
+    c = await client.ping_server(url)
+    return (await c.request()).response
+
+def ping_all(hosts):
+    for v in hosts:
+        a = asyncio.get_event_loop().run_until_complete(pingit(v))
+        print("Host: {}\nResponse: {}".format(v, a))
+
+if __name__ == "__main__":
+    ping_all(sys.argv[1:])

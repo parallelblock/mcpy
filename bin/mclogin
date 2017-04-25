@@ -1,0 +1,40 @@
+#!/usr/bin/env python3
+import asyncio
+import getpass
+
+from mcpy import auth, client, client_helpers
+
+async def login(server=None, auth_creds=dict()):
+    if "username" not in auth_creds or auth_creds["username"] is None:
+        auth_creds["username"] = input("Username: ")
+    
+    if "password" not in auth_creds or auth_creds["password"] is None:
+        auth_creds["password"] = getpass.getpass()
+
+    print("Logging in to Mojang.net...")
+    with auth.AuthAPI() as auth_api:
+        creds = await auth_api.authenticate(**auth_creds)
+
+        if server is None:
+            server = input("Server: ")
+        print("Joining...")
+        login_client = await client.join_server(server)
+        play_client = await login_client.login(creds)
+        print("Joined! Attaching keep alive and sleeping...")
+        client_helpers.attach_keep_alive(play_client)
+        await play_client.event_loop_until_close()
+
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(description="Log into a Minecraft server")
+    parser.add_argument("--username", help="Username to login with")
+    parser.add_argument("--password", help="Password to login with")
+    parser.add_argument("--server", help="Server to login to")
+
+    args = parser.parse_args()
+    creds = {
+            "username": args.username,
+            "password": args.password
+    }
+    asyncio.get_event_loop().run_until_complete(login(args.server, creds))
+    

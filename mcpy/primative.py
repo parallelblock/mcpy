@@ -1,9 +1,10 @@
+from mcpy import varint
+
 from json import dumps, loads
 import math
 import nbt
 import struct
 from uuid import UUID
-import varint
 
 def rip(buf, t, size):
     v = struct.unpack(t, buf[:size])[0]
@@ -123,7 +124,7 @@ def w_s_uuid(buf, val):
 def r_uuid(buf):
     ur = buf[:16]
     del buf[:16]
-    return UUID(bytes=ur)
+    return UUID(bytes=bytes(ur))
 
 def w_uuid(buf, val):
     buf.extend(val.bytes)
@@ -139,20 +140,21 @@ def w_v_bytes(buf, b):
     buf.extend(b)
 
 def bytearray_buffer(array):
-    def read(n):
-        d = array[:n]
-        del array[:n]
-        return d
-    def write(d):
-        array.extend(d)
+    class a:
+        def read(n):
+            d = array[:n]
+            del array[:n]
+            return d
+        def write(d):
+            array.extend(d)
 
-    return read, write
+    return a
 
 def r_nbt(buf):
-    return nbt.TAG_Compound(buffer=bytearray_buffer(buf)[0])
+    return nbt.nbt.TAG_Compound(buffer=bytearray_buffer(buf))
 
 def w_nbt(buf, val):
-    val._render_buffer(bytearray_buffer(buf)[1])
+    val._render_buffer(bytearray_buffer(buf))
 
 def r_position(buf):
     val = r_u_long(buf)
